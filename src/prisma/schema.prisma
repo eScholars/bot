@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model discord {
+  id           Int    @id @default(autoincrement())
+  discordid    String @unique(map: "Discord_discordid_key") @db.VarChar(18)
+  escholarid   Int    @unique(map: "Discord_escholarid_key")
+  refreshtoken String @db.Text
+  token        String @db.Text
+  users        users  @relation(fields: [escholarid], references: [id], map: "Discord_escholarid_fkey")
+}
+
+model tokens {
+  id    Int    @id @default(autoincrement())
+  token String @db.Text
+}
+
+model users {
+  id        Int      @id @default(autoincrement())
+  firstname String   @db.VarChar(16)
+  surname   String   @db.VarChar(16)
+  username  String   @unique
+  email     String   @db.VarChar(100)
+  password  String   @db.Text
+  bio       String   @db.Text
+  discord   discord?
+  videos    videos[]
+}
+
+model variables {
+  id    Int    @id @default(autoincrement())
+  key   String @db.Text
+  value String @db.Text
+}
+
+model videos {
+  id          Int    @id @default(autoincrement())
+  video       String @unique
+  title       String @db.VarChar(50)
+  description String @db.Text
+  kudos       Int
+  streams     Int
+  authorId    Int
+  extension   String @default("mp4") @db.Text
+  author       users  @relation(fields: [authorId], references: [id])
+
+  @@index([authorId], map: "videos_authorId_fkey")
+}
